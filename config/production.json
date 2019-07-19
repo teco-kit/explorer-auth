@@ -2,7 +2,6 @@
 	"server" : {
 		"db": {
 			"url": "mongodb://mongo:27017/auth"
-		},
-		"logger": true
+		}
 	}
 }

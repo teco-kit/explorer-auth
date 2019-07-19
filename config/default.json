@@ -2,7 +2,6 @@
 	"server" : {
 		"db": {
 			"url": "mongodb://localhost:27017/auth_dev"
-		},
-		"logger": true
+		}
 	}
 }
