@@ -1,0 +1,25 @@
+{
+  "name": "authentication",
+  "version": "1.0.0",
+  "description": "Authentication Server for AURA",
+  "main": "server.js",
+  "scripts": {
+    "start": "node $NODE_DEBUG_OPTION server.js",
+    "start:dev": "$(npm bin)/nodemon server.js --ignore tools --ignore build --ignore analysis",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "aura-development@vs-ssh.visualstudio.com:v3/aura-development/Aura/authentication"
+  },
+  "author": "Jennifer Münk <muenk@teco.edu>",
+  "license": "MIT",
+  "dependencies": {
+    "config": "^3.2.1",
+    "koa": "^2.7.0",
+    "koa-convert": "^1.2.0",
+    "koa-cors": "0.0.16",
+    "koa-logger": "^3.2.1",
+    "mongoose": "^5.6.5"
+  }
+}
