@@ -2,6 +2,7 @@
 	"server" : {
 		"db": {
 			"url": "mongodb://mongo:27017/auth"
-		}
+		},
+		"secret" : "default_secret"
 	}
 }

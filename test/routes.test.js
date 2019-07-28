@@ -6,6 +6,8 @@ const server      = require('../server');
 const {expect} = chai;
 const request = supertest(server);
 
+let token = '';
+
 describe('Testing API Routes', () => {
 	before('check connection', (done) => {
 		mongoose.connection.on('connected', () => {
@@ -30,6 +32,8 @@ describe('Testing API Routes', () => {
         })
         .expect(201)
         .end((err, res) => {
+          expect(res.body.data)
+            .to.be.equal('Successfully created user!');
           done(err);
         });
     });
@@ -44,7 +48,7 @@ describe('Testing API Routes', () => {
         .expect(500)
         .end((err, res) => {
           expect(res.body.error)
-            .to.be.equal('invalid name or email');
+            .to.be.equal('user object');
           done(err);
         });
     });
@@ -52,19 +56,34 @@ describe('Testing API Routes', () => {
 
   // LOGIN
   describe('POST /login', () => {
-    it('returns a user by username', (done) => {
+    it('200 and token on correct password', (done) => {
       request.post(`/login`)
         .send({
           name: 'UserDummy1',
-          password: 'testpw',
+          password: 'testpw'
         })
         .expect(200)
         .end((err, res) => {
           expect(res.body.data)
-            .to.have.all.keys('_id', 'name', 'email', 'password', '__v');
+            .to.have.all.keys('success', 'token');
+          token = res.body.data.token;
           done(err);
         });
       });
+
+    it('400 on incorrect password', (done) => {
+      request.post(`/login`)
+        .send({
+          name: 'UserDummy1',
+          password: 'wrongpw'
+        })
+        .expect(400)
+        .end((err, res) => {
+          expect(res.body.error)
+            .to.be.equal('Password not correct!');
+          done(err);
+        });
+    });
 
     // get user with invalid id should return 404
     it('returns status 404 when user not found', (done) => {
@@ -76,6 +95,41 @@ describe('Testing API Routes', () => {
         .end((err, res) => {
           expect(res.body.error)
             .to.be.equal(`user 'unknown' not found`);
+          done(err);
+        });
+    });
+  });
+
+  // AUTHENTICATE
+  describe('POST /authenticate', () => {
+    it('authenticate with right token', (done) => {
+      request.post(`/authenticate`)
+        .set({'Authorization': token})
+        .expect(200)
+        .end((err, res) => {
+          expect(res.body.data.success)
+            .to.be.equal(true);
+          done(err);
+        });
+    });
+
+    it('authenticate with empty token', (done) => {
+      request.post(`/authenticate`)
+        .expect(401)
+        .end((err, res) => {
+          expect(res.body.error)
+            .to.be.equal('Unauthorized');
+          done(err);
+        });
+    });
+
+    it('authenticate with malformed token', (done) => {
+      request.post(`/authenticate`)
+        .set({'Authorization': 'Bearer invalid'})
+        .expect(401)
+        .end((err, res) => {
+          expect(res.body.error)
+            .to.be.equal('Unauthorized');
           done(err);
         });
     });

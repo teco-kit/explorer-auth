@@ -1,44 +1,82 @@
 const Model = require('../models/userModel').model;
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+
+const Config = require('config');
+const config = Config.get('server');
+
+const secret = process.env.SECRET || config.secret;
 
 /**
- * create a new user
+ * register a new user
  */
-async function createUser(ctx) {
+async function registerNewUser(ctx) {
   try {
-    const document = new Model(ctx.request.body);
-    const result = await document.save();
-    ctx.body = {data: result};
+    // create user
+    const result = new Model(ctx.request.body);
+
+    // encrypt password
+    const salt = bcrypt.genSaltSync(10);
+    result.password = bcrypt.hashSync(result.password, salt);
+
+    // store user
+    await result.save();
+
+    // send response
+    ctx.body = {data: 'Successfully created user!'};
     ctx.status = 201;
     return ctx;
   } catch (error) {
-    ctx.body = {error: 'invalid name or email'};
+    ctx.body = {error: 'user object'};
     ctx.status = 500;
     return ctx;
   }
 }
 
 /**
- * get user by username
+ * log in user by name and return jwt
  */
-async function getUserByUsername(ctx) {
-  try {
-    const user = await Model.findOne({ name: ctx.request.body.name });
-    if(!user) {
-      throw new Error();
-    } else {
-      console.log(user);
-      ctx.body = {data: user};
-      ctx.status = 200;
-      return ctx.body;
-    }
-  } catch (error) {
+async function loginUser(ctx) {
+  // retrieve user
+  const user = await Model.findOne({ name: ctx.request.body.name });
+
+  // handle user not found
+  if(!user) {
     ctx.body = {error: `user '${ctx.request.body.name}' not found`};
     ctx.status = 404;
     return ctx;
+  } else {
+    const isMatch = bcrypt.compareSync(ctx.request.body.password, user.password);
+
+    if (isMatch) {
+      // password correct
+      const payload = {
+        id: user._id,
+        name: user.name
+      };
+
+      const token = jwt.sign(payload, secret, {expiresIn: 36000});
+
+      ctx.body = {
+        data:
+          {
+            success: true,
+            token: `Bearer ${token}`
+          }
+      };
+      ctx.status = 200;
+      return ctx;
+
+    } else {
+      // password incorrect
+      ctx.status = 400;
+      ctx.body = {error: 'Password not correct!'};
+      return ctx;
+    }
   }
 }
 
 module.exports = {
-  createUser,
-  getUserByUsername
+  registerNewUser,
+  loginUser
 };
