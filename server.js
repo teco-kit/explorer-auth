@@ -1,4 +1,5 @@
 const Koa          = require('koa');
+const KoaStatic    = require('koa-static');
 const logger       = require('koa-logger');
 const Config       = require('config');
 const mongoose     = require('mongoose');
@@ -33,6 +34,7 @@ passport.use(passportConfig.strategy);
 server.use(convert(cors()));
 server.use(convert(bodyParser()));
 server.use(convert(logger()));
+server.use(serve('./public'));
 
 // unprotected routing
 const router = require('./src/routes/router')(server, passport);
