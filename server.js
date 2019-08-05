@@ -34,7 +34,7 @@ passport.use(passportConfig.strategy);
 server.use(convert(cors()));
 server.use(convert(bodyParser()));
 server.use(convert(logger()));
-server.use(serve('./public'));
+server.use(KoaStatic('./public'));
 
 // unprotected routing
 const router = require('./src/routes/router')(server, passport);
