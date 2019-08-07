@@ -26,7 +26,6 @@ describe('Testing API Routes', () => {
     it('saves a new user', (done) => {
       request.post('/register')
         .send({
-          name: 'UserDummy1',
           email: 'dummyUser@aura.com',
           password: 'testpw',
         })
@@ -42,7 +41,6 @@ describe('Testing API Routes', () => {
     it('returns status 500 when object format wrong', (done) => {
       request.post('/register')
         .send({
-          name: 'UserDummy1',
           password: 'testpw',
         })
         .expect(500)
@@ -59,7 +57,7 @@ describe('Testing API Routes', () => {
     it('200 and token on correct password', (done) => {
       request.post(`/login`)
         .send({
-          name: 'UserDummy1',
+          email: 'dummyUser@aura.com',
           password: 'testpw'
         })
         .expect(200)
@@ -74,7 +72,7 @@ describe('Testing API Routes', () => {
     it('400 on incorrect password', (done) => {
       request.post(`/login`)
         .send({
-          name: 'UserDummy1',
+          email: 'dummyUser@aura.com',
           password: 'wrongpw'
         })
         .expect(400)
@@ -89,12 +87,12 @@ describe('Testing API Routes', () => {
     it('returns status 404 when user not found', (done) => {
       request.post('/login')
         .send({
-          name: 'unknown'
+          email: 'un@known.com'
         })
         .expect(404)
         .end((err, res) => {
           expect(res.body.error)
-            .to.be.equal(`user 'unknown' not found`);
+            .to.be.equal(`user 'un@known.com' not found`);
           done(err);
         });
     });

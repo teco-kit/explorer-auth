@@ -38,11 +38,11 @@ async function registerNewUser(ctx) {
  */
 async function loginUser(ctx) {
   // retrieve user
-  const user = await Model.findOne({ name: ctx.request.body.name });
+  const user = await Model.findOne({ email: ctx.request.body.email });
 
   // handle user not found
   if(!user) {
-    ctx.body = {error: `user '${ctx.request.body.name}' not found`};
+    ctx.body = {error: `user '${ctx.request.body.email}' not found`};
     ctx.status = 404;
     return ctx;
   } else {
@@ -52,7 +52,6 @@ async function loginUser(ctx) {
       // password correct
       const payload = {
         id: user._id,
-        name: user.name
       };
 
       const token = jwt.sign(payload, secret, {expiresIn: 36000});
