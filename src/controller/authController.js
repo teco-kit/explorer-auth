@@ -8,7 +8,7 @@ async function handleAuthentication(ctx, passport) {
       ctx.status = 401;
       return ctx;
     } else {
-      ctx.body = {data: {success: true}};
+      ctx.body = {success: true};
       ctx.status = 200;
       return ctx;
     }

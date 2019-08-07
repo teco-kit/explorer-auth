@@ -31,7 +31,7 @@ describe('Testing API Routes', () => {
         })
         .expect(201)
         .end((err, res) => {
-          expect(res.body.data)
+          expect(res.body.message)
             .to.be.equal('Successfully created user!');
           done(err);
         });
@@ -62,9 +62,9 @@ describe('Testing API Routes', () => {
         })
         .expect(200)
         .end((err, res) => {
-          expect(res.body.data)
+          expect(res.body)
             .to.have.all.keys('success', 'token');
-          token = res.body.data.token;
+          token = res.body.token;
           done(err);
         });
       });
@@ -105,7 +105,7 @@ describe('Testing API Routes', () => {
         .set({'Authorization': token})
         .expect(200)
         .end((err, res) => {
-          expect(res.body.data.success)
+          expect(res.body.success)
             .to.be.equal(true);
           done(err);
         });

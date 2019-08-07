@@ -23,7 +23,7 @@ async function registerNewUser(ctx) {
     await result.save();
 
     // send response
-    ctx.body = {data: 'Successfully created user!'};
+    ctx.body = {message: 'Successfully created user!'};
     ctx.status = 201;
     return ctx;
   } catch (error) {
@@ -57,11 +57,8 @@ async function loginUser(ctx) {
       const token = jwt.sign(payload, secret, {expiresIn: 36000});
 
       ctx.body = {
-        data:
-          {
-            success: true,
-            token: `Bearer ${token}`
-          }
+        success: true,
+        token: `Bearer ${token}`,
       };
       ctx.status = 200;
       return ctx;
