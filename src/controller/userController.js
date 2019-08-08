@@ -68,7 +68,6 @@ async function loginUser(ctx) {
 		const token = jwt.sign(payload, secret, {expiresIn: config.ttl});
 
 		ctx.body = {
-			success: true,
 			auth_token: `Bearer ${token}`,
 			refresh_token: `${user.refreshToken}`,
 		};
