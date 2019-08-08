@@ -3,7 +3,7 @@ const KoaStatic    = require('koa-static');
 const logger       = require('koa-logger');
 const Config       = require('config');
 const mongoose     = require('mongoose');
-const cors				 = require('koa-cors');
+const cors         = require('koa-cors');
 const convert      = require('koa-convert');
 const bodyParser   = require('koa-bodyparser');
 const passport     = require('koa-passport');
@@ -38,14 +38,15 @@ server.use(KoaStatic('./public'));
 
 // unprotected routing
 const router = require('./src/routes/router')(server, passport);
+
 server.use(router.unprotected.routes());
 server.use(router.protected.routes());
 
 // catch all middleware
 server.use(async (ctx) => {
-  ctx.body = {error: 'Not Found'};
-  ctx.status = 404;
-  return ctx;
+	ctx.body = {error: 'Not Found'};
+	ctx.status = 404;
+	return ctx;
 });
 
 module.exports = server.listen(3002);

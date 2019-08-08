@@ -4,6 +4,8 @@
 			"url": "mongodb://mongo:27017/auth"
 		},
 		"secret" : "default_secret",
-		"ttl": 3600
+		"refresh_secret": "default_secret",
+		"ttl": 3600,
+		"refresh_ttl": 3600
 	}
 }
