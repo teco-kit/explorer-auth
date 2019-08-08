@@ -1,6 +1,7 @@
 const Router          = require('koa-router');
 const userController  = require('../controller/userController');
 const authController  = require('../controller/authController');
+const healthController  = require('../controller/healthController');
 
 module.exports = (app, passport) => {
 	const router = {
@@ -50,6 +51,17 @@ module.exports = (app, passport) => {
 	 */
 	router.unprotected.post('/authenticate', async (ctx) => {
 		await authController.handleAuthentication(ctx, passport);
+	});
+
+	/**
+	 * HEALTHCHECK
+	 *
+	 * check if service is up and running
+	 * route:					/healthcheck
+	 * method type: 	GET
+	 */
+	router.unprotected.get('/healthcheck', async (ctx) => {
+		await healthController.check(ctx);
 	});
 
 
