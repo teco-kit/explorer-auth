@@ -63,8 +63,8 @@ describe('Testing API Routes', () => {
         .expect(200)
         .end((err, res) => {
           expect(res.body)
-            .to.have.all.keys('success', 'token');
-          token = res.body.token;
+            .to.have.all.keys('success', 'auth_token', 'refresh_token');
+          token = res.body.auth_token;
           done(err);
         });
       });

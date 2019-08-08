@@ -54,11 +54,12 @@ async function loginUser(ctx) {
         id: user._id,
       };
 
-      const token = jwt.sign(payload, secret, {expiresIn: 36000});
+      const token = jwt.sign(payload, secret, {expiresIn: config.ttl});
 
       ctx.body = {
         success: true,
-        token: `Bearer ${token}`,
+        auth_token: `Bearer ${token}`,
+        refresh_token: `notworkingyet`,
       };
       ctx.status = 200;
       return ctx;

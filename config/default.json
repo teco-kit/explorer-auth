@@ -3,6 +3,7 @@
 		"db": {
 			"url": "mongodb://localhost:27017/auth_dev"
 		},
-		"secret" : "default_secret"
+		"secret" : "default_secret",
+		"ttl": 3600
 	}
 }
