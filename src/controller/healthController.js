@@ -1,6 +1,6 @@
 
 /**
- * log in user by refresh token and return jwt
+ * check if service is up and running
  */
 async function check(ctx) {
 	// TODO: add more logic here if needed
