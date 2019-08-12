@@ -98,7 +98,7 @@ async function loginUserRefresh(ctx) {
 			return ctx;
 		}
 
-		const token = jwt.sign({id: user._id}, secret, {expiresIn: 1});
+		const token = jwt.sign({id: user._id}, secret, {expiresIn: config.ttl});
 		ctx.body = {access_token: `${token}`};
 
 		return ctx;
