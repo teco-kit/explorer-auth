@@ -11,14 +11,10 @@ const opts = {
 	secretOrKey: secret
 };
 
-const strategy = new Strategy(opts, (jwt_payload, done) => {
-	User.findOne({id: jwt_payload.sub}, (err, user) => {
-		if (err) {
-			return done(err, false);
-		}
-		if (user) {
-			return done(null, user);
-		}
+const strategy = new Strategy(opts, (jwtPayload, done) => {
+	User.findOne({id: jwtPayload.sub}, (err, user) => {
+		if (err) return done(err, false);
+		if (user) return done(null, user);
 		return done(null, false);
 	});
 });

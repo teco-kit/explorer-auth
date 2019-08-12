@@ -88,13 +88,6 @@ async function loginUserRefresh(ctx) {
 	try{
 		const payload = await jwt.verify(ctx.request.body.refresh_token, config.refresh_secret);
 
-		// check if token is expired
-		if (Date.now() >= payload.exp * 1000) {
-			ctx.status = 401;
-			ctx.body = {error: 'token expired'};
-			return ctx;
-		}
-
 		// retrieve user
 		const user = await Model.findById(payload.id);
 
@@ -105,13 +98,13 @@ async function loginUserRefresh(ctx) {
 			return ctx;
 		}
 
-		const token = jwt.sign({id: user._id}, secret, {expiresIn: config.ttl});
+		const token = jwt.sign({id: user._id}, secret, {expiresIn: 1});
 		ctx.body = {access_token: `${token}`};
 
 		return ctx;
 	} catch(e) {
 		ctx.status = 401;
-		ctx.body = {error: 'error while decoding token'};
+		ctx.body = {error: 'token expired'};
 		return ctx;
 	}
 }
