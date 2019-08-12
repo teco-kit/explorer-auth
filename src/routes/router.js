@@ -4,10 +4,7 @@ const authController  = require('../controller/authController');
 const healthController  = require('../controller/healthController');
 
 module.exports = (app, passport) => {
-	const router = {
-		unprotected: new Router(),
-		protected: new Router(),
-	};
+	const router = {unprotected: new Router()};
 
 	/**
 	 * REGISTER
