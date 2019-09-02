@@ -1,4 +1,3 @@
-
 /**
  * check if service is up and running
  */

@@ -85,58 +85,28 @@ async function loginUser(ctx) {
  * log in user by refresh token and return jwt
  */
 async function loginUserRefresh(ctx) {
-	let payload;
 	try{
-		payload = await new Promise((resolve, reject) => {
-			jwt.verify(ctx.request.body.refresh_token, config.refresh_secret, (err, decoded) => {
-				if(err){
-					reject(err);
-				}else{
-					resolve(decoded);
-				}
-			});
-		});
-	}catch(e){
+		const payload = await jwt.verify(ctx.request.body.refresh_token, config.refresh_secret);
+
+		// retrieve user
+		const user = await Model.findById(payload.id);
+
+		// check if token is revoked
+		if(user.refreshToken !== ctx.request.body.refresh_token){
+			ctx.status = 401;
+			ctx.body = {error: 'token is revoked'};
+			return ctx;
+		}
+
+		const token = jwt.sign({id: user._id}, secret, {expiresIn: config.ttl});
+		ctx.body = {access_token: `${token}`};
+
+		return ctx;
+	} catch(e) {
 		ctx.status = 401;
-		ctx.body = {message: 'cant decode token'};
+		ctx.body = {error: 'token expired'};
 		return ctx;
 	}
-
-	// check if token is expired
-	if (Date.now() >= payload.exp * 1000) {
-		ctx.status = 401;
-		ctx.body = {message: 'expired'};
-		return ctx;
-	}
-
-	// retrieve user
-	const user = await Model.findById(payload.id);
-
-	// check if user exists
-	if(!user) {
-		ctx.body = {error: `user not found`};
-		ctx.status = 404;
-		return ctx;
-	}
-
-	// check if token is revoked
-	if(user.refreshToken !== ctx.request.body.refresh_token){
-		ctx.status = 401;
-		ctx.body = {message: 'token is revoked'};
-		return ctx;
-	}
-
-	const tokenPayload = {
-		id: user._id,
-	};
-
-	const token = jwt.sign(tokenPayload, secret, {expiresIn: config.ttl});
-
-	ctx.body = {
-		access_token: `${token}`,
-	};
-
-	return ctx;
 }
 
 module.exports = {
