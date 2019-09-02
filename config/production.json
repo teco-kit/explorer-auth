@@ -6,6 +6,6 @@
 		"secret" : "default_secret",
 		"refresh_secret": "default_secret",
 		"ttl": 3600,
-		"refresh_ttl": 3600
+		"refresh_ttl": 10368000
 	}
 }
