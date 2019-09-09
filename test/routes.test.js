@@ -51,7 +51,7 @@ describe('Testing API Routes', () => {
 				.expect(500)
 				.end((err, res) => {
 					expect(res.body.error)
-						.to.be.equal('user object');
+						.to.include('User validation failed');
 					done(err);
 				});
 		});
