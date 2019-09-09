@@ -13,6 +13,7 @@ const secret = process.env.SECRET || config.secret;
  */
 async function registerNewUser(ctx) {
 	try {
+		console.log(ctx.request.body);
 		// create user
 		const result = new Model(ctx.request.body);
 
@@ -38,7 +39,7 @@ async function registerNewUser(ctx) {
 		ctx.status = 201;
 		return ctx;
 	} catch (error) {
-		ctx.body = {error: 'user object'};
+		ctx.body = {error: error.message};
 		ctx.status = 500;
 		return ctx;
 	}
