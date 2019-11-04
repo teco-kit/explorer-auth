@@ -5,8 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node $NODE_DEBUG_OPTION server.js",
-    "start:dev": "$(npm bin)/nodemon server.js --ignore tools --ignore build --ignore analysis",
-    "test": "NODE_ENV=testing nyc mocha --exit"
+    "start:docker": "NODE_ENV=docker node $NODE_DEBUG_OPTION server.js",
+    "test": "NODE_ENV=test nyc mocha --exit"
   },
   "repository": {
     "type": "git",
@@ -18,7 +18,7 @@
     "bcrypt": "^3.0.6",
     "bcryptjs": "^2.4.3",
     "chai": "^4.2.0",
-    "config": "^3.2.1",
+    "config": "^1.30.0",
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.7.0",
     "koa-bodyparser": "^4.2.1",
