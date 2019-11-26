@@ -4,7 +4,8 @@ const authController  = require('../controller/authController');
 const healthController  = require('../controller/healthController');
 
 module.exports = (app, passport) => {
-	const router = {unprotected: new Router()};
+	const prefixRouter = new Router();
+	const router = new Router();
 
 	/**
 	 * REGISTER
@@ -13,7 +14,7 @@ module.exports = (app, passport) => {
 	 * route:					/register
 	 * method type: 	POST
 	 */
-	router.unprotected.post('/register', async (ctx) => {
+	router.post('/register', async (ctx) => {
 		await userController.registerNewUser(ctx);
 	});
 
@@ -24,7 +25,7 @@ module.exports = (app, passport) => {
 	 * route:					/login
 	 * method type: 	POST
 	 */
-	router.unprotected.post('/login', async (ctx) => {
+	router.post('/login', async (ctx) => {
 		await userController.loginUser(ctx);
 	});
 
@@ -35,7 +36,7 @@ module.exports = (app, passport) => {
 	 * route:					/refresh
 	 * method type: 	POST
 	 */
-	router.unprotected.post('/refresh', async (ctx) => {
+	router.post('/refresh', async (ctx) => {
 		await userController.loginUserRefresh(ctx);
 	});
 
@@ -46,7 +47,7 @@ module.exports = (app, passport) => {
 	 * route:					/authenticate
 	 * method type: 	POST
 	 */
-	router.unprotected.post('/authenticate', async (ctx) => {
+	router.post('/authenticate', async (ctx) => {
 		await authController.handleAuthentication(ctx, passport);
 	});
 
@@ -57,10 +58,11 @@ module.exports = (app, passport) => {
 	 * route:					/healthcheck
 	 * method type: 	GET
 	 */
-	router.unprotected.get('/healthcheck', async (ctx) => {
+	router.get('/healthcheck', async (ctx) => {
 		await healthController.check(ctx);
 	});
 
+	prefixRouter.use('/auth', router.routes(), router.allowedMethods());
 
-	return router;
+	return prefixRouter;
 };

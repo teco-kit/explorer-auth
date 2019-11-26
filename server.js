@@ -39,7 +39,7 @@ server.use(KoaStatic('./public'));
 // unprotected routing
 const router = require('./src/routes/router')(server, passport);
 
-server.use(router.unprotected.routes());
+server.use(router.routes());
 
 // catch all middleware
 server.use(async (ctx) => {
