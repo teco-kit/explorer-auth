@@ -29,7 +29,7 @@ describe('Testing API Routes', () => {
 	describe('POST /register', () => {
 		// create a new user with a valid dummy
 		it('saves a new user', (done) => {
-			request.post('/register')
+			request.post('/auth/register')
 				.send({
 					email: 'dummyUser@aura.com',
 					password: 'testpw',
@@ -44,7 +44,7 @@ describe('Testing API Routes', () => {
 
 		// creating a user with an invalid dummy should not be possible
 		it('returns status 500 when object format wrong', (done) => {
-			request.post('/register')
+			request.post('/auth/register')
 				.send({
 					password: 'testpw',
 				})
@@ -60,7 +60,7 @@ describe('Testing API Routes', () => {
 	// LOGIN
 	describe('POST /login', () => {
 		it('200 and token on correct password', (done) => {
-			request.post(`/login`)
+			request.post(`/auth/login`)
 				.send({
 					email: 'dummyUser@aura.com',
 					password: 'testpw'
@@ -77,7 +77,7 @@ describe('Testing API Routes', () => {
 		});
 
 		it('400 on incorrect password', (done) => {
-			request.post(`/login`)
+			request.post(`/auth/login`)
 				.send({
 					email: 'dummyUser@aura.com',
 					password: 'wrongpw'
@@ -92,7 +92,7 @@ describe('Testing API Routes', () => {
 
 		// get user with invalid id should return 404
 		it('returns status 404 when user not found', (done) => {
-			request.post('/login')
+			request.post('/auth/login')
 				.send({
 					email: 'un@known.com'
 				})
@@ -108,7 +108,7 @@ describe('Testing API Routes', () => {
 	// AUTHENTICATE
 	describe('POST /authenticate', () => {
 		it('authenticate with right token', (done) => {
-			request.post(`/authenticate`)
+			request.post(`/auth/authenticate`)
 				.set({Authorization: accessToken})
 				.expect(200)
 				.end((err, res) => {
@@ -119,7 +119,7 @@ describe('Testing API Routes', () => {
 		});
 
 		it('authenticate with empty token', (done) => {
-			request.post(`/authenticate`)
+			request.post(`/auth/authenticate`)
 				.expect(401)
 				.end((err, res) => {
 					expect(res.body.error)
@@ -129,7 +129,7 @@ describe('Testing API Routes', () => {
 		});
 
 		it('authenticate with malformed token', (done) => {
-			request.post(`/authenticate`)
+			request.post(`/auth/authenticate`)
 				.set({Authorization: 'Bearer invalid'})
 				.expect(401)
 				.end((err, res) => {
@@ -143,7 +143,7 @@ describe('Testing API Routes', () => {
 	// REFRESH
 	describe('POST /refresh', () => {
 		it('login with refresh token', (done) => {
-			request.post(`/refresh`)
+			request.post(`/auth/refresh`)
 				.send({refresh_token: refreshToken})
 				.expect(200)
 				.end((err, res) => {
@@ -154,7 +154,7 @@ describe('Testing API Routes', () => {
 		});
 
 		it('token revoked', (done) => {
-      request.post(`/refresh`)
+      request.post(`/auth/refresh`)
         .send({refresh_token: expiredToken})
         .expect(401)
         .end((err, res) => {
@@ -167,7 +167,7 @@ describe('Testing API Routes', () => {
     it('token expired', (done) => {
       Model.updateOne(userID, {refreshToken: 'revoked'}, (error) => {
         if(error) done(error);
-        request.post(`/refresh`)
+        request.post(`/auth/refresh`)
           .send({refresh_token: refreshToken})
           .expect(401)
           .end((err, res) => {
@@ -182,7 +182,7 @@ describe('Testing API Routes', () => {
 	// FALLBACK ROUTE
 	describe('Health Check', () => {
 		it('check if service is up and running', (done) => {
-			request.get('/healthcheck')
+			request.get('/auth/healthcheck')
 				.expect(200)
 				.end((err, res) => {
 					done(err);
