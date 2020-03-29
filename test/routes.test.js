@@ -8,7 +8,7 @@ const Model = require('../src/models/userModel').model;
 const {expect} = chai;
 const request = supertest(server);
 
-const expiredToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVkNTE4YTc0MjNjNGZlMTQ5ZGRiOGM1ZCIsImlhdCI6MTU2NTYyNDk0OCwiZXhwIjoxNTY1NjI0OTQ5fQ.KPY1kI-t-QbQlYVwPYrcMCQZMy3GfjLQx78j6pzdpvI'
+const expiredToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVkNTE4YTc0MjNjNGZlMTQ5ZGRiOGM1ZCIsImlhdCI6MTU2NTYyNDk0OCwiZXhwIjoxNTY1NjI0OTQ5fQ.KPY1kI-t-QbQlYVwPYrcMCQZMy3GfjLQx78j6pzdpvI';
 let accessToken = '';
 let refreshToken = '';
 let userID = '';
@@ -154,39 +154,28 @@ describe('Testing API Routes', () => {
 		});
 
 		it('token revoked', (done) => {
-      request.post(`/auth/refresh`)
-        .send({refresh_token: expiredToken})
-        .expect(401)
-        .end((err, res) => {
-          expect(res.body.error)
-            .to.be.equal('token expired');
-          done(err);
-        });
-		});
-
-    it('token expired', (done) => {
-      Model.updateOne(userID, {refreshToken: 'revoked'}, (error) => {
-        if(error) done(error);
-        request.post(`/auth/refresh`)
-          .send({refresh_token: refreshToken})
-          .expect(401)
-          .end((err, res) => {
-            expect(res.body.error)
-              .to.be.equal('token is revoked');
-            done(err);
-          });
-      });
-    });
-	});
-
-	// FALLBACK ROUTE
-	describe('Health Check', () => {
-		it('check if service is up and running', (done) => {
-			request.get('/auth/healthcheck')
-				.expect(200)
+			request.post(`/auth/refresh`)
+				.send({refresh_token: expiredToken})
+				.expect(401)
 				.end((err, res) => {
+					expect(res.body.error)
+						.to.be.equal('token expired');
 					done(err);
 				});
+		});
+
+		it('token expired', (done) => {
+			Model.updateOne(userID, {refreshToken: 'revoked'}, (error) => {
+				if(error) done(error);
+				request.post(`/auth/refresh`)
+					.send({refresh_token: refreshToken})
+					.expect(401)
+					.end((err, res) => {
+						expect(res.body.error)
+							.to.be.equal('token is revoked');
+						done(err);
+					});
+			});
 		});
 	});
 
