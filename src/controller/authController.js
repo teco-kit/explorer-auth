@@ -10,7 +10,8 @@ async function handleAuthentication(ctx, passport) {
 		}
 		ctx.body = {
 			success: true,
-			userId: user._id
+			userId: user._id,
+			role: user.role || 'user'
 		};
 		ctx.status = 200;
 		return ctx;
