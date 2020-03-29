@@ -1,4 +1,7 @@
 # AURA Authentication Server
+
+![Tests](https://github.com/teco-kit/explorer-auth/workflows/Tests/badge.svg?branch=master)
+
 This is the authentication server for the AURA REST API.
 
 # Getting started
