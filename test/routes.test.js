@@ -9,6 +9,7 @@ const {expect} = chai;
 const request = supertest(server);
 
 const expiredToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVkNTE4YTc0MjNjNGZlMTQ5ZGRiOGM1ZCIsImlhdCI6MTU2NTYyNDk0OCwiZXhwIjoxNTY1NjI0OTQ5fQ.KPY1kI-t-QbQlYVwPYrcMCQZMy3GfjLQx78j6pzdpvI';
+const email = 'dummyuser@aura.com';
 let accessToken = '';
 let refreshToken = '';
 let userID = '';
@@ -62,7 +63,7 @@ describe('Testing API Routes', () => {
 		it('200 and token on correct password', (done) => {
 			request.post(`/auth/login`)
 				.send({
-					email: 'dummyUser@aura.com',
+					email,
 					password: 'testpw'
 				})
 				.expect(200)
@@ -176,6 +177,60 @@ describe('Testing API Routes', () => {
 						done(err);
 					});
 			});
+		});
+	});
+
+	// UNREGISTER
+	describe('DELETE /unregister', () => {
+		it('unregister with empty body', (done) => {
+			request.delete(`/auth/unregister`)
+				.set({Authorization: accessToken})
+				.send({})
+				.expect(400)
+				.end((err, res) => {
+					expect(res.body.error)
+						.to.be.equal('This route deletes a user. To delete your user account, '
+            + 'please provide your email address in the request body. '
+            + 'Be careful, this action cannot be undone');
+					done(err);
+				});
+		});
+
+		it('unregister with invalid email', (done) => {
+			request.delete(`/auth/unregister`)
+				.set({Authorization: accessToken})
+				.send({
+					email: 'invalid'
+				})
+				.expect(400)
+				.end((err, res) => {
+					expect(res.body.error)
+						.to.be.equal('Provided email does not match user email.');
+					done(err);
+				});
+		});
+
+		it('unregister with malformed token', (done) => {
+			request.delete(`/auth/unregister`)
+				.set({Authorization: 'Bearer invalid'})
+				.expect(401)
+				.end((err, res) => {
+					expect(res.body.error)
+						.to.be.equal('Unauthorized');
+					done(err);
+				});
+		});
+
+		it('unregister with correct request', (done) => {
+			request.delete(`/auth/unregister`)
+				.set({Authorization: accessToken})
+				.send({email})
+				.expect(200)
+				.end((err, res) => {
+					expect(res.body.message)
+						.to.be.equal(`deleted user with email: ${email}`);
+					done(err);
+				});
 		});
 	});
 

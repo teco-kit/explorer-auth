@@ -29,7 +29,7 @@ module.exports = (app, passport) => {
 	});
 
 	/**
-	 * LOGIN
+	 * REFRESH
 	 *
 	 * login by refresh token and return jwt token
 	 * route:					/refresh
@@ -48,6 +48,17 @@ module.exports = (app, passport) => {
 	 */
 	router.post('/authenticate', async (ctx) => {
 		await authController.handleAuthentication(ctx, passport);
+	});
+
+	/**
+   * UNREGISTER
+   *
+   * check if token is valid
+   * route:					/unregister
+   * method type: 	DELETE
+   */
+	router.delete('/unregister', async (ctx) => {
+		await userController.deleteUser(ctx, passport);
 	});
 
 	prefixRouter.use('/auth', router.routes(), router.allowedMethods());

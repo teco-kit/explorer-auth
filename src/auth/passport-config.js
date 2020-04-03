@@ -12,7 +12,7 @@ const opts = {
 };
 
 const strategy = new Strategy(opts, (jwtPayload, done) => {
-	User.findOne({id: jwtPayload.sub}, (err, user) => {
+	User.findOne({_id: jwtPayload.id}, (err, user) => {
 		if (err) return done(err, false);
 		if (user) return done(null, user);
 		return done(null, false);

@@ -109,8 +109,43 @@ async function loginUserRefresh(ctx) {
 	}
 }
 
+/**
+ * delete user
+ *
+ * only possible if body contains email to prevent unintentional deletions
+ */
+async function deleteUser(ctx, passport) {
+	await passport.authenticate('jwt', async (err, user, info) => {
+		if(info || !user) {
+			ctx.body = {error: 'Unauthorized'};
+			ctx.status = 401;
+			return ctx;
+		}
+		const {email} = ctx.request.body;
+		if(!email || email === '') {
+			ctx.body = {
+				error: 'This route deletes a user. To delete your user account, '
+        + 'please provide your email address in the request body. '
+        + 'Be careful, this action cannot be undone'
+			};
+			ctx.status = 400;
+			return ctx;
+		} if(email !== user.email) {
+			ctx.body = {error: 'Provided email does not match user email.'};
+			ctx.status = 400;
+			return ctx;
+		}
+		await Model.findOneAndDelete({email});
+		ctx.body = {message: `deleted user with email: ${email}`};
+		ctx.status = 200;
+		return ctx;
+	})(ctx);
+}
+
+
 module.exports = {
 	registerNewUser,
 	loginUser,
-	loginUserRefresh
+	loginUserRefresh,
+	deleteUser
 };
