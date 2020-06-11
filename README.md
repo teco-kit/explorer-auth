@@ -1,8 +1,7 @@
-# AURA Authentication Server
+# Explorer Authentication
+The authentication part of the explorer project which can be found [here](https://github.com/teco-kit/explorer/blob/master/README.md).
 
 ![Tests](https://github.com/teco-kit/explorer-auth/workflows/Tests/badge.svg?branch=master)
-
-This is the authentication server for the AURA REST API.
 
 # Getting started
 Before you get started clone *this repository* and the *backend repository* 
