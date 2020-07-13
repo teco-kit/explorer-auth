@@ -234,6 +234,31 @@ describe('Testing API Routes', () => {
 		});
 	});
 
+	// USERS
+	describe('GET /users', () => {
+		it('users with malformed token', (done) => {
+			request.get(`/auth/users`)
+				.set({Authorization: 'Bearer invalid'})
+				.expect(401)
+				.end((err, res) => {
+					expect(res.body.error)
+						.to.be.equal('Unauthorized');
+					done(err);
+				});
+		});
+
+		it('get all users', (done) => {
+			request.get(`/auth/users`)
+				.set({Authorization: accessToken})
+				.expect(401)
+				.end((err, res) => {
+					expect(res.body.error)
+						.to.be.equal('Forbidden');
+					done(err);
+				});
+		});
+	});
+
 	// FALLBACK ROUTE
 	describe('Test Errors', () => {
 		it('404 on unknown route', (done) => {

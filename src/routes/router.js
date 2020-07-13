@@ -57,8 +57,19 @@ module.exports = (app, passport) => {
    * route:					/unregister
    * method type: 	DELETE
    */
-	router.delete('/unregister', async (ctx) => {
+	router.delete('/unregister',  async (ctx) => {
 		await userController.deleteUser(ctx, passport);
+	});
+
+	/**
+   * LIST ALL USERS
+   *
+   * lists all users, admin rights needed
+   * route:					/users
+   * method type: 	GET
+   */
+	router.get('/users', async (ctx) => {
+		await userController.getUsers(ctx, passport);
 	});
 
 	prefixRouter.use('/auth', router.routes(), router.allowedMethods());

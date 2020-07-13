@@ -142,10 +142,32 @@ async function deleteUser(ctx, passport) {
 	})(ctx);
 }
 
+/**
+ * get all users
+ */
+async function getUsers(ctx, passport) {
+	await passport.authenticate('jwt', async (err, user, info) => {
+		if(info) {
+			ctx.body = {error: 'Unauthorized'};
+			ctx.status = 401;
+			return ctx;
+		}
+		if(user.role !== 'admin') {
+			ctx.body = {error: 'Forbidden'};
+			ctx.status = 401;
+			return ctx;
+		}
+		ctx.body = await Model.find({}, '-__v -password -refreshToken');
+		ctx.status = 200;
+		return ctx;
+	})(ctx);
+}
+
 
 module.exports = {
 	registerNewUser,
 	loginUser,
 	loginUserRefresh,
-	deleteUser
+	deleteUser,
+	getUsers
 };
