@@ -30,6 +30,14 @@ mongoose.set('useCreateIndex', true);
 server.use(passport.initialize());
 passport.use(passportConfig.strategy);
 
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+
+passport.deserializeUser((user, done) => {
+  done(null, user);
+});
+
 // setup koa middlewares
 server.use(convert(cors()));
 server.use(convert(bodyParser()));

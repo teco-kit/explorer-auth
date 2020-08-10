@@ -20,6 +20,13 @@ const User = new mongoose.Schema({
 	role: {
 		type: String,
 		default: 'user'
+	},
+	twoFactorEnabled: {
+		type: Boolean,
+		default: false
+	},
+	twoFactorToken: {
+		type: Object
 	}
 });
 

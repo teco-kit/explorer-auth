@@ -57,12 +57,15 @@ async function loginUser(ctx) {
 		ctx.status = 404;
 		return ctx;
 	}
+
 	const isMatch = bcrypt.compareSync(ctx.request.body.password, user.password);
 
 	if (isMatch) {
 		// password correct
 		const payload = {
 			id: user._id,
+			twoFactorEnabled: user.twoFactorEnabled,
+			twoFactorVerified: false
 		};
 
 		const token = jwt.sign(payload, secret, {expiresIn: config.ttl});
@@ -70,6 +73,8 @@ async function loginUser(ctx) {
 		ctx.body = {
 			access_token: `Bearer ${token}`,
 			refresh_token: `${user.refreshToken}`,
+      twoFactorEnabled: user.twoFactorEnabled,
+      twoFactorVerified: false
 		};
 		ctx.status = 200;
 		return ctx;
@@ -86,10 +91,10 @@ async function loginUser(ctx) {
  */
 async function loginUserRefresh(ctx) {
 	try{
-		const payload = await jwt.verify(ctx.request.body.refresh_token, config.refresh_secret);
+		const jwtUserObject = await jwt.verify(ctx.request.body.refresh_token, config.refresh_secret);
 
 		// retrieve user
-		const user = await Model.findById(payload.id);
+		const user = await Model.findById(jwtUserObject.id);
 
 		// check if token is revoked
 		if(user.refreshToken !== ctx.request.body.refresh_token){
@@ -98,7 +103,13 @@ async function loginUserRefresh(ctx) {
 			return ctx;
 		}
 
-		const token = jwt.sign({id: user._id}, secret, {expiresIn: config.ttl});
+		const payload = {
+			id: user._id,
+			twoFactorEnabled: user.twoFactorEnabled,
+			twoFactorVerified: false
+		};
+
+		const token = jwt.sign(payload, secret, {expiresIn: config.ttl});
 		ctx.body = {access_token: `${token}`};
 
 		return ctx;

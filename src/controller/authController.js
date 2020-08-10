@@ -1,8 +1,32 @@
+const speakeasy = require('speakeasy');
+const QRCode = require('qrcode');
+const jwt    = require('jsonwebtoken');
+const Config = require('config');
+
+const config = Config.get('server');
+
+const secret = process.env.SECRET || config.secret;
+
 /**
  * handle authentication response
  */
 async function handleAuthentication(ctx, passport) {
-	await passport.authenticate('jwt', (err, user, info) => {
+	await passport.authenticate('jwt', async (err, user, info) => {
+		const jwtToken = ctx.request.headers.authorization.replace('Bearer ', '');
+
+		try {
+			const jwtUserObject = await jwt.verify(jwtToken, secret);
+			if(jwtUserObject.twoFactorEnabled && !jwtUserObject.twoFactorVerified) {
+				ctx.body = {error: 'Unauthorized'};
+				ctx.status = 401;
+				return ctx;
+			}
+		} catch(error) {
+			ctx.body = { error: error.message };
+			ctx.status = 500;
+			return ctx;
+		}
+
 		if(info) {
 			ctx.body = {error: 'Unauthorized'};
 			ctx.status = 401;
@@ -18,6 +42,143 @@ async function handleAuthentication(ctx, passport) {
 	})(ctx);
 }
 
+/**
+ * init 2factor
+ * generate a secret token to be saved in an application like Google Authenticator
+ */
+async function init2Fa(ctx) {
+	const { user } = ctx.req;
+
+	if(!user) {
+		ctx.body = {error: 'User not found'};
+		ctx.status = 404;
+		return ctx;
+	}
+
+	const twoFasecret = speakeasy.generateSecret({
+		length: 20,
+		name: `Explorer (${user.email})`
+	});
+
+	user.twoFactorEnabled = true;
+	user.twoFactorToken = {
+		otpauthUrl: twoFasecret.otpauth_url,
+		base32: twoFasecret.base32,
+	};
+
+	await user.save();
+
+	ctx.body = await QRCode.toDataURL(twoFasecret.otpauth_url);
+	ctx.type = 'image/png';
+
+	console.log('QR Code:', ctx.body);
+
+	ctx.status = 200;
+	return ctx;
+}
+
+/**
+ * verify 2factor code
+ */
+function verify2Fa(ctx) {
+	const { user } = ctx.req;
+	const { token } = ctx.request.body;
+
+	// check if token provided
+	if(!token) {
+		ctx.body = {error: 'token for TwoFactorAuthentication missing'};
+		ctx.status = 400;
+		return ctx;
+	}
+
+	// check if token provided
+	if(!user.twoFactorEnabled) {
+		ctx.body = {error: 'TwoFactorAuthentication is not enabled.'};
+		ctx.status = 400;
+		return ctx;
+	}
+
+	// validate provided token
+	const valid = speakeasy.totp.verify({
+		secret: user.twoFactorToken.base32,
+		encoding: 'base32',
+		token,
+	});
+
+	if(!valid) {
+		ctx.body = {
+			error: 'TwoFactorAuthentication token is not valid!',
+			isTwoFactorAuthenticated: false
+		};
+		ctx.status = 401;
+		return ctx;
+	}
+
+	// create new jwt token that contains twoFactorVerified and is therefore valid for backend routes
+	const payload = {
+		id: user._id,
+		twoFactorEnabled: user.twoFactorEnabled,
+		twoFactorVerified: true
+	};
+
+	const jwtToken = jwt.sign(payload, secret, {expiresIn: config.ttl});
+
+	ctx.body = {
+		isTwoFactorAuthenticated: true,
+		access_token: `Bearer ${jwtToken}`,
+		refresh_token: `${user.refreshToken}`,
+	};
+	ctx.status = 200;
+	return ctx;
+}
+
+/**
+ * reset 2factor
+ * only possible after successful 2fa verification
+ */
+async function reset2Fa(ctx) {
+	const { user } = ctx.req;
+
+	if(!user) {
+		ctx.body = {error: 'User not found'};
+		ctx.status = 404;
+		return ctx;
+	}
+
+	if(!user.twoFactorEnabled) {
+		ctx.body = {message: 'TwoFactorAuthentication already disabled!'};
+		ctx.status = 200;
+		return ctx;
+	}
+
+	const jwtToken = ctx.request.headers.authorization.replace('Bearer ', '');
+
+	try {
+		const jwtUserObject = await jwt.verify(jwtToken, secret);
+		if(jwtUserObject.twoFactorEnabled && !jwtUserObject.twoFactorVerified) {
+			ctx.body = {error: 'Unauthorized'};
+			ctx.status = 401;
+			return ctx;
+		}
+	} catch(error) {
+		ctx.body = { error: error.message };
+		ctx.status = 500;
+		return ctx;
+	}
+
+	user.twoFactorEnabled = false;
+	user.twoFactorToken = null;
+
+	await user.save();
+
+	ctx.body = {message: 'Successfully reset TwoFactorAuthentication!'};
+	ctx.status = 200;
+	return ctx;
+}
+
 module.exports = {
-	handleAuthentication
+	handleAuthentication,
+	init2Fa,
+	verify2Fa,
+	reset2Fa
 };

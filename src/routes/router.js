@@ -29,18 +29,51 @@ module.exports = (app, passport) => {
 	});
 
 	/**
-	 * REFRESH
-	 *
-	 * login by refresh token and return jwt token
-	 * route:					/refresh
-	 * method type: 	POST
-	 */
+   * REFRESH
+   *
+   * login by refresh token and return jwt token
+   * route:					/refresh
+   * method type: 	POST
+   */
 	router.post('/refresh', async (ctx) => {
 		await userController.loginUserRefresh(ctx);
 	});
 
 	/**
-	 * Authenticate
+   * 2FA-INIT
+   *
+   * generate a secret token to be saved in an application like Google Authenticator.
+   * route:					/2fa-secret
+   * method type: 	POST
+   */
+	router.post('/2fa/init', passport.authenticate('jwt'), async (ctx) => {
+		await authController.init2Fa(ctx);
+	});
+
+	/**
+   * 2FA-VERIFY
+   *
+   * verify a time-based one-time password (TOTP) based on the secret token
+   * route:					/2fa-generate
+   * method type: 	POST
+   */
+	router.post('/2fa/verify', passport.authenticate('jwt'), async (ctx) => {
+		await authController.verify2Fa(ctx);
+	});
+
+	/**
+   * 2FA-RESET
+   *
+   * reset 2fa
+   * route:					/2fa/reset
+   * method type: 	POST
+   */
+	router.post('/2fa/reset', passport.authenticate('jwt'), async (ctx) => {
+		await authController.reset2Fa(ctx);
+	});
+
+	/**
+	 * AUTHENTICATE
 	 *
 	 * check if token is valid
 	 * route:					/authenticate
