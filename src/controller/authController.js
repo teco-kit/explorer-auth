@@ -60,7 +60,6 @@ async function init2Fa(ctx) {
 		name: `Explorer (${user.email})`
 	});
 
-	user.twoFactorEnabled = true;
 	user.twoFactorToken = {
 		otpauthUrl: twoFasecret.otpauth_url,
 		base32: twoFasecret.base32,
@@ -80,20 +79,13 @@ async function init2Fa(ctx) {
 /**
  * verify 2factor code
  */
-function verify2Fa(ctx) {
+async function verify2Fa(ctx) {
 	const { user } = ctx.req;
 	const { token } = ctx.request.body;
 
 	// check if token provided
 	if(!token) {
 		ctx.body = {error: 'token for TwoFactorAuthentication missing'};
-		ctx.status = 400;
-		return ctx;
-	}
-
-	// check if token provided
-	if(!user.twoFactorEnabled) {
-		ctx.body = {error: 'TwoFactorAuthentication is not enabled.'};
 		ctx.status = 400;
 		return ctx;
 	}
@@ -113,6 +105,10 @@ function verify2Fa(ctx) {
 		ctx.status = 401;
 		return ctx;
 	}
+
+	// enable 2fa in user object, since user now initiated 2fa successfully
+	user.twoFactorEnabled = true;
+	await user.save();
 
 	// create new jwt token that contains twoFactorVerified and is therefore valid for backend routes
 	const payload = {
