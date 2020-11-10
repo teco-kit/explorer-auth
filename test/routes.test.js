@@ -69,7 +69,7 @@ describe('Testing API Routes', () => {
 				.expect(200)
 				.end((err, res) => {
 					expect(res.body)
-						.to.have.all.keys('access_token', 'refresh_token');
+						.to.have.all.keys('access_token', 'refresh_token', 'twoFactorEnabled', 'twoFactorVerified');
 					accessToken = res.body.access_token;
 					refreshToken = res.body.refresh_token;
 					userID = res.body._id;
@@ -124,7 +124,7 @@ describe('Testing API Routes', () => {
 				.expect(401)
 				.end((err, res) => {
 					expect(res.body.error)
-						.to.be.equal('Unauthorized');
+						.to.be.equal('Missing authentication header');
 					done(err);
 				});
 		});
@@ -132,10 +132,10 @@ describe('Testing API Routes', () => {
 		it('authenticate with malformed token', (done) => {
 			request.post(`/auth/authenticate`)
 				.set({Authorization: 'Bearer invalid'})
-				.expect(401)
+				.expect(500)
 				.end((err, res) => {
 					expect(res.body.error)
-						.to.be.equal('Unauthorized');
+						.to.be.equal('jwt malformed');
 					done(err);
 				});
 		});

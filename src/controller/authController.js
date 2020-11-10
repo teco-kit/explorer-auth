@@ -12,8 +12,16 @@ const secret = process.env.SECRET || config.secret;
  */
 async function handleAuthentication(ctx, passport) {
 	await passport.authenticate('jwt', async (err, user, info) => {
-		const jwtToken = ctx.request.headers.authorization.replace('Bearer ', '');
+		const token = ctx.request.headers.authorization;
 
+		if(!token) {
+			ctx.body = {error: 'Missing authentication header'};
+			ctx.status = 401;
+			return ctx;
+		}
+
+		const jwtToken = ctx.request.headers.authorization.replace('Bearer ', '');
+		console.log('jwtToken', jwtToken);
 		try {
 			const jwtUserObject = await jwt.verify(jwtToken, secret);
 			if(jwtUserObject.twoFactorEnabled && !jwtUserObject.twoFactorVerified) {
