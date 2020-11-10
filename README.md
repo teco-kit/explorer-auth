@@ -10,7 +10,7 @@ and make sure, both repositories are located in the same folder.
 You can either run the application within a docker container or directly.
 
 ## Docker 
-Please refer to the <a href="https://aura-development.visualstudio.com/Aura/_git/backend.database-abstraction">backend installation guide</a>. 
+Please refer to the <a href="https://github.com/teco-kit/explorer-backend">backend installation guide</a>. 
 
 Hint: Since the docker-compose file is located in the backend repository you need to 
 run docker-compose from within the backend repository.
