@@ -105,6 +105,10 @@ module.exports = (app, passport) => {
 		await userController.getUsers(ctx, passport);
 	});
 
+	router.post('/mail', async (ctx) => {
+		await userController.getUsersMail(ctx, passport);
+	})
+
 	prefixRouter.use('/auth', router.routes(), router.allowedMethods());
 
 	return prefixRouter;
