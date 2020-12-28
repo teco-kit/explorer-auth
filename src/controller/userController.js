@@ -187,12 +187,16 @@ async function getUsersMail(ctx, passport) {
       return ctx;
     }
     const userIds = ctx.request.body;
-    console.log(userIds);
     const users = await Model.find({ _id: userIds });
-    console.log(users);
-    ctx.body = users.map((elm) => {
-      return { _id: elm._id, email: elm.email };
-    });
+    var res = [];
+    for (i = 0; i < userIds.length; i++) {
+      for (j = 0; j < userIds.length; j++) {
+        if (userIds[i] === String(users[j]._id)) {
+          res.push({_id: users[j]._id, email: users[j].email})
+        }
+      }
+    }
+    ctx.body = res;
     ctx.status = 200;
     return ctx;
   })(ctx);
