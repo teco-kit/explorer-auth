@@ -49,6 +49,9 @@ async function registerNewUser(ctx) {
  */
 async function loginUser(ctx) {
   // retrieve user
+  console.log("logging in user")
+  const users = await Model.find({})
+  console.log()
   const user = await Model.findOne({ email: ctx.request.body.email });
 
   // handle user not found
@@ -191,7 +194,7 @@ async function getUsersMail(ctx, passport) {
     var res = [];
     for (i = 0; i < userIds.length; i++) {
       for (j = 0; j < userIds.length; j++) {
-        if (userIds[i] === String(users[j]._id)) {
+        if (String(userIds[i]) === String(users[j]._id)) {
           res.push({_id: users[j]._id, email: users[j].email})
         }
       }
