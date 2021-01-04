@@ -49,9 +49,7 @@ async function registerNewUser(ctx) {
  */
 async function loginUser(ctx) {
   // retrieve user
-  console.log("logging in user")
-  const users = await Model.find({})
-  console.log()
+  const users = await Model.find({});
   const user = await Model.findOne({ email: ctx.request.body.email });
 
   // handle user not found
@@ -149,6 +147,7 @@ async function deleteUser(ctx, passport) {
       ctx.status = 400;
       return ctx;
     }
+    onEmailChangeSubmit;
     if (email !== user.email) {
       ctx.body = { error: "Provided email does not match user email." };
       ctx.status = 400;
@@ -182,6 +181,64 @@ async function getUsers(ctx, passport) {
   })(ctx);
 }
 
+/**
+ * Change the e-mail address of a user
+ */
+async function changeUserMail(ctx, passport) {
+  await passport.authenticate("jwt", async (err, user, info) => {
+    if (info) {
+      ctx.body = { error: "Unauthorized" };
+      ctx.status = 401;
+      return ctx;
+    }
+    const { email } = ctx.request.body;
+    if (!validateEmail(email)) {
+      ctx.body = `${email} is not a valid e-mail address`;
+      ctx.status = 400;
+    } else {
+      await Model.findByIdAndUpdate(
+        { _id: user._id },
+        { $set: { email: email } }
+      );
+      ctx.body = `Changed e-mail address from ${user.email} to ${email}`;
+      ctx.status = 200;
+    }
+  })(ctx);
+}
+
+/**
+ * Change the password of a user
+ */
+async function changeUserPassword(ctx, passport) {
+  await passport.authenticate("jwt", async (err, user, info) => {
+    if (info) {
+      ctx.body = { error: "Unauthorized" };
+      ctx.status = 401;
+      return ctx;
+    }
+    const { password, newPassword } = ctx.request.body;
+    if (!password || !newPassword) {
+      ctx.status = 400;
+      ctx.body = "Provide the current password and the new password"
+      return ctx;
+    }
+    const isMatch = bcrypt.compareSync(password, user.password);
+    if (isMatch) {
+      const salt = bcrypt.genSaltSync(10);
+      await Model.findByIdAndUpdate(
+        { _id: user._id },
+        { $set: { password: bcrypt.hashSync(newPassword, salt) } }
+      );
+      ctx.body = "Changed password"
+      ctx.status = 200;
+    }
+    else {
+      ctx.body = "Passwords do not match";
+      ctx.status = 400;
+    }
+  })(ctx);
+}
+
 async function getUsersMail(ctx, passport) {
   await passport.authenticate("jwt", async (err, user, info) => {
     if (info) {
@@ -195,7 +252,7 @@ async function getUsersMail(ctx, passport) {
     for (i = 0; i < userIds.length; i++) {
       for (j = 0; j < userIds.length; j++) {
         if (String(userIds[i]) === String(users[j]._id)) {
-          res.push({_id: users[j]._id, email: users[j].email})
+          res.push({ _id: users[j]._id, email: users[j].email });
         }
       }
     }
@@ -205,6 +262,11 @@ async function getUsersMail(ctx, passport) {
   })(ctx);
 }
 
+function validateEmail(email) {
+  const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return email && re.test(String(email).toLowerCase());
+}
+
 module.exports = {
   registerNewUser,
   loginUser,
@@ -212,4 +274,6 @@ module.exports = {
   deleteUser,
   getUsers,
   getUsersMail,
+  changeUserMail,
+  changeUserPassword
 };
