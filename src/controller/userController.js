@@ -147,7 +147,6 @@ async function deleteUser(ctx, passport) {
       ctx.status = 400;
       return ctx;
     }
-    onEmailChangeSubmit;
     if (email !== user.email) {
       ctx.body = { error: "Provided email does not match user email." };
       ctx.status = 400;
