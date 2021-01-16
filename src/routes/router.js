@@ -107,13 +107,22 @@ module.exports = (app, passport) => {
 
   /**
    *
-   * Gets the E-Mail address to the user._id
+   * Maps user._id to e-mail addresses
    * route: 				/mail
    * method type: POST
    */
   router.post("/mail", async (ctx) => {
     await userController.getUsersMail(ctx, passport);
   });
+
+  /**
+   * Maps e-mail addresses to user._id
+   * route: /id
+   * method: type: POST
+   */
+  router.post("/id", async (ctx) => {
+    await userController.getUserId(ctx, passport)
+  })
 
   /**
    * Allows a user to change his own e-mail address

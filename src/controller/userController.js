@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const Config = require("config");
+const ObjectId = require('mongoose').Types.ObjectId;
 
 const Model = require("../models/userModel").model;
 
@@ -218,7 +219,7 @@ async function changeUserPassword(ctx, passport) {
     const { password, newPassword } = ctx.request.body;
     if (!password || !newPassword) {
       ctx.status = 400;
-      ctx.body = "Provide the current password and the new password"
+      ctx.body = "Provide the current password and the new password";
       return ctx;
     }
     const isMatch = bcrypt.compareSync(password, user.password);
@@ -228,10 +229,9 @@ async function changeUserPassword(ctx, passport) {
         { _id: user._id },
         { $set: { password: bcrypt.hashSync(newPassword, salt) } }
       );
-      ctx.body = "Changed password"
+      ctx.body = "Changed password";
       ctx.status = 200;
-    }
-    else {
+    } else {
       ctx.body = "Passwords do not match";
       ctx.status = 400;
     }
@@ -246,6 +246,11 @@ async function getUsersMail(ctx, passport) {
       return ctx;
     }
     const userIds = ctx.request.body;
+    if (!(Array.isArray(userIds) && userIds.every(elm => ObjectId.isValid(elm)))) {
+      ctx.body = {error: "Provide valid ids in an array"}
+      ctx.status = 401;
+      return ctx;
+    }
     const users = await Model.find({ _id: userIds });
     var res = [];
     for (i = 0; i < userIds.length; i++) {
@@ -261,6 +266,31 @@ async function getUsersMail(ctx, passport) {
   })(ctx);
 }
 
+async function getUserId(ctx, passport) {
+  await passport.authenticate("jwt", async (err, user, info) => {
+    if (info) {
+      ctx.body = { error: "Unauthorized" };
+      ctx.status = 401;
+      return ctx;
+    }
+    if (!validateEmail(ctx.request.body.email)) {
+      ctx.body = {error: "The input must be a single e-mail address"};
+      ctx.status = 401;
+      return ctx;
+    }
+    const data = await Model.find({});
+    const userData = await Model.find({email: ctx.request.body.email});
+    if (userData.length === 0) {
+      ctx.body = {error: "This e-mail is not registered in the system"};
+      ctx.status = 401;
+      return ctx;
+    }
+    ctx.body = { _id: userData[0]._id, email: userData[0].email };
+    ctx.status = 200;
+    return ctx;
+
+  })(ctx);
+}
 function validateEmail(email) {
   const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return email && re.test(String(email).toLowerCase());
@@ -274,5 +304,6 @@ module.exports = {
   getUsers,
   getUsersMail,
   changeUserMail,
-  changeUserPassword
+  changeUserPassword,
+  getUserId
 };
