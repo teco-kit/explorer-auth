@@ -38,6 +38,7 @@ describe("Testing API Routes", () => {
         .send({
           email: email,
           password: password,
+          userName: "testName"
         })
         .expect(201)
         .end((err, res) => {
@@ -222,18 +223,18 @@ describe("Testing API Routes", () => {
         .end((err, res) => {
           done(err);
         });
-	});
-	
-	it("No valid access token", (done) => {
-		request
-		  .post("/auth/id")
-		  .send({ email: "noExistingMail@teco.edu" })
-		  .set({ Authorization: expiredToken })
-		  .expect(401)
-		  .end((err, res) => {
-			done(err);
-		  });
-	  });
+    });
+
+    it("No valid access token", (done) => {
+      request
+        .post("/auth/id")
+        .send({ email: "noExistingMail@teco.edu" })
+        .set({ Authorization: expiredToken })
+        .expect(401)
+        .end((err, res) => {
+          done(err);
+        });
+    });
   });
 
   // UNREGISTER
@@ -247,8 +248,8 @@ describe("Testing API Routes", () => {
         .end((err, res) => {
           expect(res.body.error).to.be.equal(
             "This route deletes a user. To delete your user account, " +
-              "please provide your email address in the request body. " +
-              "Be careful, this action cannot be undone"
+            "please provide your email address in the request body. " +
+            "Be careful, this action cannot be undone"
           );
           done(err);
         });
