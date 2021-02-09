@@ -51,7 +51,13 @@ async function registerNewUser(ctx) {
 async function loginUser(ctx) {
   // retrieve user
   const users = await Model.find({});
-  const user = await Model.findOne({ email: ctx.request.body.email });
+  let user = null;
+  if (validateEmail(ctx.request.body.email)) {
+    user = await Model.findOne({ email: ctx.request.body.email });
+  }
+  else {
+    user = await Model.findOne({ userName: ctx.request.body.email });
+  }
 
   // handle user not found
   if (!user) {
@@ -247,7 +253,7 @@ async function getUsersMail(ctx, passport) {
     }
     const userIds = ctx.request.body;
     if (!(Array.isArray(userIds) && userIds.every(elm => ObjectId.isValid(elm)))) {
-      ctx.body = {error: "Provide valid ids in an array"}
+      ctx.body = { error: "Provide valid ids in an array" }
       ctx.status = 401;
       return ctx;
     }
@@ -274,14 +280,14 @@ async function getUserId(ctx, passport) {
       return ctx;
     }
     if (!validateEmail(ctx.request.body.email)) {
-      ctx.body = {error: "The input must be a single e-mail address"};
+      ctx.body = { error: "The input must be a single e-mail address" };
       ctx.status = 401;
       return ctx;
     }
     const data = await Model.find({});
-    const userData = await Model.find({email: ctx.request.body.email});
+    const userData = await Model.find({ email: ctx.request.body.email });
     if (userData.length === 0) {
-      ctx.body = {error: "This e-mail is not registered in the system"};
+      ctx.body = { error: "This e-mail is not registered in the system" };
       ctx.status = 401;
       return ctx;
     }

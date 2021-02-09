@@ -1,10 +1,10 @@
 {
-	"server": {
-		"db": "mongodb://mongo:27017/auth_dev",
-		"secret" : "default_secret",
-		"refresh_secret": "default_secret",
-		"ttl": 259200,
-		"refresh_ttl": 259200
-	}
+    "server": {
+        "db": "mongodb://mongo:27017/auth_dev",
+        "secret": "default_secret",
+        "refresh_secret": "default_secret",
+        "ttl": 259200,
+        "refresh_ttl": 259200,
+        "autoIndex": true
+    }
 }
-
