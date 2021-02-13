@@ -1,11 +1,11 @@
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
-const Config = require("config");
-const ObjectId = require('mongoose').Types.ObjectId;
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const Config = require('config');
+const { ObjectId } = require('mongoose').Types;
 
-const Model = require("../models/userModel").model;
+const Model = require('../models/userModel').model;
 
-const config = Config.get("server");
+const config = Config.get('server');
 
 const secret = process.env.SECRET || config.secret;
 
@@ -35,7 +35,7 @@ async function registerNewUser(ctx) {
     await result.save();
 
     // send response
-    ctx.body = { message: "Successfully created user!" };
+    ctx.body = { message: 'Successfully created user!' };
     ctx.status = 201;
     return ctx;
   } catch (error) {
@@ -54,8 +54,7 @@ async function loginUser(ctx) {
   let user = null;
   if (validateEmail(ctx.request.body.email)) {
     user = await Model.findOne({ email: ctx.request.body.email });
-  }
-  else {
+  } else {
     user = await Model.findOne({ userName: ctx.request.body.email });
   }
 
@@ -72,6 +71,8 @@ async function loginUser(ctx) {
     // password correct
     const payload = {
       id: user._id,
+      email: user.email,
+      userName: user.userName,
       twoFactorEnabled: user.twoFactorEnabled,
       twoFactorVerified: false,
     };
@@ -90,7 +91,7 @@ async function loginUser(ctx) {
 
   // password incorrect
   ctx.status = 400;
-  ctx.body = { error: "Password not correct!" };
+  ctx.body = { error: 'Password not correct!' };
   return ctx;
 }
 
@@ -110,11 +111,13 @@ async function loginUserRefresh(ctx) {
     // check if token is revoked
     if (user.refreshToken !== ctx.request.body.refresh_token) {
       ctx.status = 401;
-      ctx.body = { error: "token is revoked" };
+      ctx.body = { error: 'token is revoked' };
       return ctx;
     }
 
     const payload = {
+      mail: user.email,
+      userName: user.userName,
       id: user._id,
       twoFactorEnabled: user.twoFactorEnabled,
       twoFactorVerified: false,
@@ -126,7 +129,7 @@ async function loginUserRefresh(ctx) {
     return ctx;
   } catch (e) {
     ctx.status = 401;
-    ctx.body = { error: "token expired" };
+    ctx.body = { error: 'token expired' };
     return ctx;
   }
 }
@@ -137,25 +140,25 @@ async function loginUserRefresh(ctx) {
  * only possible if body contains email to prevent unintentional deletions
  */
 async function deleteUser(ctx, passport) {
-  await passport.authenticate("jwt", async (err, user, info) => {
+  await passport.authenticate('jwt', async (err, user, info) => {
     if (info || !user) {
-      ctx.body = { error: "Unauthorized" };
+      ctx.body = { error: 'Unauthorized' };
       ctx.status = 401;
       return ctx;
     }
     const { email } = ctx.request.body;
-    if (!email || email === "") {
+    if (!email || email === '') {
       ctx.body = {
         error:
-          "This route deletes a user. To delete your user account, " +
-          "please provide your email address in the request body. " +
-          "Be careful, this action cannot be undone",
+          'This route deletes a user. To delete your user account, '
+          + 'please provide your email address in the request body. '
+          + 'Be careful, this action cannot be undone',
       };
       ctx.status = 400;
       return ctx;
     }
     if (email !== user.email) {
-      ctx.body = { error: "Provided email does not match user email." };
+      ctx.body = { error: 'Provided email does not match user email.' };
       ctx.status = 400;
       return ctx;
     }
@@ -170,18 +173,18 @@ async function deleteUser(ctx, passport) {
  * get all users
  */
 async function getUsers(ctx, passport) {
-  await passport.authenticate("jwt", async (err, user, info) => {
+  await passport.authenticate('jwt', async (err, user, info) => {
     if (info) {
-      ctx.body = { error: "Unauthorized" };
+      ctx.body = { error: 'Unauthorized' };
       ctx.status = 401;
       return ctx;
     }
-    if (user.role !== "admin") {
-      ctx.body = { error: "Forbidden" };
+    if (user.role !== 'admin') {
+      ctx.body = { error: 'Forbidden' };
       ctx.status = 401;
       return ctx;
     }
-    ctx.body = await Model.find({}, "-__v -password -refreshToken");
+    ctx.body = await Model.find({}, '-__v -password -refreshToken');
     ctx.status = 200;
     return ctx;
   })(ctx);
@@ -191,9 +194,9 @@ async function getUsers(ctx, passport) {
  * Change the e-mail address of a user
  */
 async function changeUserMail(ctx, passport) {
-  await passport.authenticate("jwt", async (err, user, info) => {
+  await passport.authenticate('jwt', async (err, user, info) => {
     if (info) {
-      ctx.body = { error: "Unauthorized" };
+      ctx.body = { error: 'Unauthorized' };
       ctx.status = 401;
       return ctx;
     }
@@ -204,7 +207,7 @@ async function changeUserMail(ctx, passport) {
     } else {
       await Model.findByIdAndUpdate(
         { _id: user._id },
-        { $set: { email: email } }
+        { $set: { email } }
       );
       ctx.body = `Changed e-mail address from ${user.email} to ${email}`;
       ctx.status = 200;
@@ -216,16 +219,16 @@ async function changeUserMail(ctx, passport) {
  * Change the password of a user
  */
 async function changeUserPassword(ctx, passport) {
-  await passport.authenticate("jwt", async (err, user, info) => {
+  await passport.authenticate('jwt', async (err, user, info) => {
     if (info) {
-      ctx.body = { error: "Unauthorized" };
+      ctx.body = { error: 'Unauthorized' };
       ctx.status = 401;
       return ctx;
     }
     const { password, newPassword } = ctx.request.body;
     if (!password || !newPassword) {
       ctx.status = 400;
-      ctx.body = "Provide the current password and the new password";
+      ctx.body = 'Provide the current password and the new password';
       return ctx;
     }
     const isMatch = bcrypt.compareSync(password, user.password);
@@ -235,30 +238,30 @@ async function changeUserPassword(ctx, passport) {
         { _id: user._id },
         { $set: { password: bcrypt.hashSync(newPassword, salt) } }
       );
-      ctx.body = "Changed password";
+      ctx.body = 'Changed password';
       ctx.status = 200;
     } else {
-      ctx.body = "Passwords do not match";
+      ctx.body = 'Passwords do not match';
       ctx.status = 400;
     }
   })(ctx);
 }
 
 async function getUsersMail(ctx, passport) {
-  await passport.authenticate("jwt", async (err, user, info) => {
+  await passport.authenticate('jwt', async (err, user, info) => {
     if (info) {
-      ctx.body = { error: "Unauthorized" };
+      ctx.body = { error: 'Unauthorized' };
       ctx.status = 401;
       return ctx;
     }
     const userIds = ctx.request.body;
     if (!(Array.isArray(userIds) && userIds.every(elm => ObjectId.isValid(elm)))) {
-      ctx.body = { error: "Provide valid ids in an array" }
+      ctx.body = { error: 'Provide valid ids in an array' };
       ctx.status = 401;
       return ctx;
     }
     const users = await Model.find({ _id: userIds });
-    var res = [];
+    const res = [];
     for (i = 0; i < userIds.length; i++) {
       for (j = 0; j < userIds.length; j++) {
         if (String(userIds[i]) === String(users[j]._id)) {
@@ -273,28 +276,27 @@ async function getUsersMail(ctx, passport) {
 }
 
 async function getUserId(ctx, passport) {
-  await passport.authenticate("jwt", async (err, user, info) => {
+  await passport.authenticate('jwt', async (err, user, info) => {
     if (info) {
-      ctx.body = { error: "Unauthorized" };
+      ctx.body = { error: 'Unauthorized' };
       ctx.status = 401;
       return ctx;
     }
     if (!validateEmail(ctx.request.body.email)) {
-      ctx.body = { error: "The input must be a single e-mail address" };
+      ctx.body = { error: 'The input must be a single e-mail address' };
       ctx.status = 401;
       return ctx;
     }
     const data = await Model.find({});
     const userData = await Model.find({ email: ctx.request.body.email });
     if (userData.length === 0) {
-      ctx.body = { error: "This e-mail is not registered in the system" };
+      ctx.body = { error: 'This e-mail is not registered in the system' };
       ctx.status = 401;
       return ctx;
     }
     ctx.body = { _id: userData[0]._id, email: userData[0].email };
     ctx.status = 200;
     return ctx;
-
   })(ctx);
 }
 function validateEmail(email) {
