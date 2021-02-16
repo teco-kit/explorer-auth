@@ -194,25 +194,53 @@ async function getUsers(ctx, passport) {
  * Change the e-mail address of a user
  */
 async function changeUserMail(ctx, passport) {
-  await passport.authenticate('jwt', async (err, user, info) => {
-    if (info) {
-      ctx.body = { error: 'Unauthorized' };
-      ctx.status = 401;
-      return ctx;
-    }
-    const { email } = ctx.request.body;
-    if (!validateEmail(email)) {
-      ctx.body = `${email} is not a valid e-mail address`;
-      ctx.status = 400;
-    } else {
-      await Model.findByIdAndUpdate(
-        { _id: user._id },
-        { $set: { email } }
-      );
-      ctx.body = `Changed e-mail address from ${user.email} to ${email}`;
+  try {
+    await passport.authenticate('jwt', async (err, user, info) => {
+      if (info) {
+        ctx.body = { error: 'Unauthorized' };
+        ctx.status = 401;
+        return ctx;
+      }
+      const { email } = ctx.request.body;
+      if (!validateEmail(email)) {
+        ctx.body = `${email} is not a valid e-mail address`;
+        ctx.status = 400;
+      } else {
+        await Model.findByIdAndUpdate(
+          { _id: user._id },
+          { $set: { email } }
+        );
+        ctx.body = `Changed e-mail address from ${user.email} to ${email}`;
+        ctx.status = 200;
+      }
+    })(ctx);
+  } catch (error) {
+    ctx.body = { error: "E-mail already exists" };
+    ctx.status = 400;
+    return ctx;
+  }
+}
+
+
+async function changeUserName(ctx, passport) {
+  try {
+    await passport.authenticate('jwt', async (err, user, info) => {
+      if (info) {
+        ctx.body = { error: 'Unauthorized' };
+        ctx.status = 401;
+        return ctx;
+      }
+      const { userName } = ctx.request.body;
+      await Model.findByIdAndUpdate({ _id: user._id }, { $set: { userName } });
+      ctx.body = `Changed username address from ${user.userName} to ${userName}`;
       ctx.status = 200;
-    }
-  })(ctx);
+      return ctx;
+    })(ctx);
+  } catch (error) {
+    ctx.body = { error: 'Username already exists' };
+    ctx.status = 400;
+    return ctx;
+  }
 }
 
 /**
@@ -241,7 +269,7 @@ async function changeUserPassword(ctx, passport) {
       ctx.body = 'Changed password';
       ctx.status = 200;
     } else {
-      ctx.body = 'Passwords do not match';
+      ctx.body = { error: 'Passwords do not match' };
       ctx.status = 400;
     }
   })(ctx);
@@ -312,6 +340,7 @@ module.exports = {
   getUsers,
   getUsersMail,
   changeUserMail,
+  changeUserName,
   changeUserPassword,
   getUserId
 };

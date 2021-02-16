@@ -139,7 +139,11 @@ module.exports = (app, passport) => {
    * method type: PUT
    */
   router.put("/changePassword", async (ctx) => {
-	  await userController.changeUserPassword(ctx, passport);
+    await userController.changeUserPassword(ctx, passport);
+  });
+
+  router.put("/changeUserName", async (ctx) => {
+    await userController.changeUserName(ctx, passport);
   })
 
   prefixRouter.use("/auth", router.routes(), router.allowedMethods());
