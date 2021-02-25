@@ -144,7 +144,11 @@ module.exports = (app, passport) => {
 
   router.put("/changeUserName", async (ctx) => {
     await userController.changeUserName(ctx, passport);
-  })
+  });
+
+  router.post("/mailsuggest", async (ctx) => {
+    await userController.getMailSuggestions(ctx, passport);
+  });
 
   prefixRouter.use("/auth", router.routes(), router.allowedMethods());
 
