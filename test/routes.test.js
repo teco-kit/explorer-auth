@@ -12,6 +12,7 @@ const jwt_decode = require("jwt-decode");
 const expiredToken =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVkNTE4YTc0MjNjNGZlMTQ5ZGRiOGM1ZCIsImlhdCI6MTU2NTYyNDk0OCwiZXhwIjoxNTY1NjI0OTQ5fQ.KPY1kI-t-QbQlYVwPYrcMCQZMy3GfjLQx78j6pzdpvI";
 const email = "dummyuser@aura.com";
+const userName = "testName";
 const password = "testPw";
 let accessToken = "";
 let refreshToken = "";
@@ -38,7 +39,7 @@ describe("Testing API Routes", () => {
         .send({
           email: email,
           password: password,
-          userName: "testName"
+          userName: userName
         })
         .expect(201)
         .end((err, res) => {
@@ -194,11 +195,11 @@ describe("Testing API Routes", () => {
     it("Valid data", (done) => {
       request
         .post("/auth/id")
-        .send({ email: email })
+        .send([userName])
         .set({ Authorization: accessToken })
         .end((err, res) => {
-          expect(res.body._id).to.be.equal(jwt_decode(accessToken).id);
-          expect(res.body.email).to.be.equal(email);
+          expect(res.body[0]._id).to.be.equal(jwt_decode(accessToken).id);
+          expect(res.body[0].userName).to.be.equal(userName);
           done();
         });
     });
@@ -206,20 +207,9 @@ describe("Testing API Routes", () => {
     it("Invalid data", (done) => {
       request
         .post("/auth/id")
-        .send({ email: "noExistingMail@teco.edu" })
+        .send(["notExistingUserName"])
         .set({ Authorization: accessToken })
-        .expect(401)
-        .end((err, res) => {
-          done(err);
-        });
-    });
-
-    it("Input is not an email address", (done) => {
-      request
-        .post("/auth/id")
-        .send({ email: "noExistingMail" })
-        .set({ Authorization: accessToken })
-        .expect(401)
+        .expect(400)
         .end((err, res) => {
           done(err);
         });
@@ -228,7 +218,7 @@ describe("Testing API Routes", () => {
     it("No valid access token", (done) => {
       request
         .post("/auth/id")
-        .send({ email: "noExistingMail@teco.edu" })
+        .send([ "notExistingUserName" ])
         .set({ Authorization: expiredToken })
         .expect(401)
         .end((err, res) => {

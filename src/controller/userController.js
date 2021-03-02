@@ -286,6 +286,11 @@ async function getUsersIds(ctx, passport) {
       return ctx;
     }
     const userIds = await Model.find({ userName: userNames});
+    if (userIds.length != userNames.length) {
+      ctx.body = {error: "Some users could not be found"};
+      ctx.status = 400;
+      return ctx;
+    }
     const res = [];
     for (i = 0; i < userIds.length; i++) {
       for (j = 0; j < userIds.length; j++) {
