@@ -271,7 +271,36 @@ async function changeUserPassword(ctx, passport) {
   })(ctx);
 }
 
-async function getUsersMail(ctx, passport) {
+async function getUsersIds(ctx, passport) {
+  await passport.authenticate("jwt", async (err, user, info) => {
+    if (info) {
+      ctx.body = { error: "Unauthorized" };
+      ctx.status = 401;
+      return ctx;
+    }
+    const userNames = ctx.request.body;
+    if (
+      !Array.isArray(userNames)) {
+      ctx.body = { error: "Provide valid usernames in an array" };
+      ctx.status = 401;
+      return ctx;
+    }
+    const userIds = await Model.find({ userName: userNames});
+    const res = [];
+    for (i = 0; i < userIds.length; i++) {
+      for (j = 0; j < userIds.length; j++) {
+        if (String(userNames[i]) === String(userIds[j].userName)) {
+          res.push({ _id: userIds[j]._id, userName: userIds[j].userName });
+        }
+      }
+    }
+    ctx.body = res;
+    ctx.status = 200;
+    return ctx;
+  })(ctx);
+}
+
+async function getUserNames(ctx, passport) {
   await passport.authenticate("jwt", async (err, user, info) => {
     if (info) {
       ctx.body = { error: "Unauthorized" };
@@ -291,7 +320,7 @@ async function getUsersMail(ctx, passport) {
     for (i = 0; i < userIds.length; i++) {
       for (j = 0; j < userIds.length; j++) {
         if (String(userIds[i]) === String(users[j]._id)) {
-          res.push({ _id: users[j]._id, email: users[j].email });
+          res.push({ _id: users[j]._id, userName: users[j].userName });
         }
       }
     }
@@ -301,48 +330,22 @@ async function getUsersMail(ctx, passport) {
   })(ctx);
 }
 
-async function getUserId(ctx, passport) {
+
+async function getUserNameSuggestions(ctx, passport) {
   await passport.authenticate("jwt", async (err, user, info) => {
     if (info) {
       ctx.body = { error: "Unauthorized" };
       ctx.status = 401;
       return ctx;
     }
-    if (!validateEmail(ctx.request.body.email)) {
-      ctx.body = { error: "The input must be a single e-mail address" };
-      ctx.status = 401;
-      return ctx;
-    }
-    const data = await Model.find({});
-    const userData = await Model.find({ email: ctx.request.body.email });
-    if (userData.length === 0) {
-      ctx.body = { error: "This e-mail is not registered in the system" };
-      ctx.status = 401;
-      return ctx;
-    }
-    ctx.body = { _id: userData[0]._id, email: userData[0].email };
+    var regexp = new RegExp("^" + ctx.request.body.userName);
+    const possibleUsers = await Model.find({ userName: regexp })
+      .limit(7)
+      .select({ userName: 1, _id: 0 });
+    ctx.body = possibleUsers.map((elm) => elm.userName);
     ctx.status = 200;
     return ctx;
   })(ctx);
-}
-
-async function getMailSuggestions(ctx, passport) {
-    console.log("Trying")
-    await passport.authenticate("jwt", async (err, user, info) => {
-      console.log("Inside")
-      if (info) {
-        ctx.body = { error: "Unauthorized" };
-        ctx.status = 401;
-        return ctx;
-      }
-      console.log("Getting users");
-      var regexp = new RegExp("^" + ctx.request.body.email);
-      const possibleUsers = await Model.find({ email: regexp }).limit(7).select({email: 1, _id: 0});
-      console.log(possibleUsers);
-      ctx.body = possibleUsers.map(elm => elm.email);
-      ctx.status = 200;
-      return ctx;
-    }) (ctx);
 }
 
 function validateEmail(email) {
@@ -356,10 +359,10 @@ module.exports = {
   loginUserRefresh,
   deleteUser,
   getUsers,
-  getUsersMail,
   changeUserMail,
   changeUserName,
   changeUserPassword,
-  getUserId,
-  getMailSuggestions,
+  getUserNames,
+  getUsersIds,
+  getUserNameSuggestions,
 };

@@ -106,23 +106,17 @@ module.exports = (app, passport) => {
   });
 
   /**
-   *
-   * Maps user._id to e-mail addresses
-   * route: 				/mail
-   * method type: POST
-   */
-  router.post("/mail", async (ctx) => {
-    await userController.getUsersMail(ctx, passport);
-  });
-
-  /**
    * Maps e-mail addresses to user._id
    * route: /id
    * method: type: POST
    */
   router.post("/id", async (ctx) => {
-    await userController.getUserId(ctx, passport)
-  })
+    await userController.getUsersIds(ctx, passport);
+  });
+
+  router.post("/userName", async (ctx) => {
+    await userController.getUserNames(ctx, passport);
+  });
 
   /**
    * Allows a user to change his own e-mail address
@@ -146,8 +140,8 @@ module.exports = (app, passport) => {
     await userController.changeUserName(ctx, passport);
   });
 
-  router.post("/mailsuggest", async (ctx) => {
-    await userController.getMailSuggestions(ctx, passport);
+  router.post("/userNameSuggest", async (ctx) => {
+    await userController.getUserNameSuggestions(ctx, passport);
   });
 
   prefixRouter.use("/auth", router.routes(), router.allowedMethods());
