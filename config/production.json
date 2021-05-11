@@ -1,6 +1,6 @@
 {
     "server": {
-        "db": "mongodb://mongo:27017/auth_dev",
+        "db": "mongodb://mongo:27017/auth_live",
         "secret": "default_secret",
         "refresh_secret": "default_secret",
         "ttl": 259200,
