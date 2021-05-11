@@ -2,6 +2,7 @@
 The authentication part of the explorer project which can be found [here](https://github.com/teco-kit/explorer/blob/master/README.md).
 
 ![Tests](https://github.com/teco-kit/explorer-auth/workflows/Tests/badge.svg?branch=master)
+[![Publish Docker image](https://github.com/teco-kit/explorer-auth/actions/workflows/publishDocker.yml/badge.svg)](https://github.com/teco-kit/explorer-auth/actions/workflows/publishDocker.yml)
 
 # Getting started
 Before you get started clone *this repository* and the *backend repository* 
