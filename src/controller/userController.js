@@ -285,9 +285,9 @@ async function getUsersIds(ctx, passport) {
       ctx.status = 401;
       return ctx;
     }
-    const userIds = await Model.find({ userName: userNames});
+    const userIds = await Model.find({ userName: userNames });
     if (userIds.length != userNames.length) {
-      ctx.body = {error: "Some users could not be found"};
+      ctx.body = { error: "Some users could not be found" };
       ctx.status = 400;
       return ctx;
     }
@@ -307,31 +307,36 @@ async function getUsersIds(ctx, passport) {
 
 async function getUserNames(ctx, passport) {
   await passport.authenticate("jwt", async (err, user, info) => {
-    if (info) {
-      ctx.body = { error: "Unauthorized" };
-      ctx.status = 401;
-      return ctx;
-    }
-    const userIds = ctx.request.body;
-    if (
-      !(Array.isArray(userIds) && userIds.every((elm) => ObjectId.isValid(elm)))
-    ) {
-      ctx.body = { error: "Provide valid ids in an array" };
-      ctx.status = 401;
-      return ctx;
-    }
-    const users = await Model.find({ _id: userIds });
-    const res = [];
-    for (i = 0; i < userIds.length; i++) {
-      for (j = 0; j < userIds.length; j++) {
-        if (String(userIds[i]) === String(users[j]._id)) {
-          res.push({ _id: users[j]._id, userName: users[j].userName });
+      if (info) {
+        ctx.body = { error: "Unauthorized" };
+        ctx.status = 401;
+        return ctx;
+      }
+      const userIds = ctx.request.body;
+      if (
+        !(Array.isArray(userIds) && userIds.every((elm) => ObjectId.isValid(elm)))
+      ) {
+        ctx.body = { error: "Provide valid ids in an array" };
+        ctx.status = 401;
+        return ctx;
+      }
+      const users = await Model.find({ _id: userIds });
+      console.log(users)
+      if (users.length != userIds.length) {
+        ctx.body = { error: "Some userIds could not be found" };
+        ctx.status = 400;
+      }
+      const res = [];
+      for (i = 0; i < userIds.length; i++) {
+        for (j = 0; j < userIds.length; j++) {
+          if (String(userIds[i]) === String(users[j]._id)) {
+            res.push({ _id: users[j]._id, userName: users[j].userName });
+          }
         }
       }
-    }
-    ctx.body = res;
-    ctx.status = 200;
-    return ctx;
+      ctx.body = res;
+      ctx.status = 200;
+      return ctx;
   })(ctx);
 }
 
