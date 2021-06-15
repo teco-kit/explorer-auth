@@ -158,12 +158,12 @@ async function deleteUser(ctx, passport) {
       return ctx;
     }
     if (email !== user.email) {
-      ctx.body = { error: "Provided email does not match user email." };
+      ctx.body = { error: "Provided e-mail does not match user e-mail." };
       ctx.status = 400;
       return ctx;
     }
     await Model.findOneAndDelete({ email });
-    ctx.body = { message: `deleted user with email: ${email}` };
+    ctx.body = { message: `Deleted user with e-mail: ${email}` };
     ctx.status = 200;
     return ctx;
   })(ctx);
@@ -207,7 +207,7 @@ async function changeUserMail(ctx, passport) {
         ctx.status = 400;
       } else {
         await Model.findByIdAndUpdate({ _id: user._id }, { $set: { email } });
-        ctx.body = `Changed e-mail address from ${user.email} to ${email}`;
+        ctx.body = {message: `Changed e-mail address from ${user.email} to ${email}`};
         ctx.status = 200;
       }
     })(ctx);
@@ -228,7 +228,7 @@ async function changeUserName(ctx, passport) {
       }
       const { userName } = ctx.request.body;
       await Model.findByIdAndUpdate({ _id: user._id }, { $set: { userName } });
-      ctx.body = `Changed username address from ${user.userName} to ${userName}`;
+      ctx.body = `Changed username from ${user.userName} to ${userName}`;
       ctx.status = 200;
       return ctx;
     })(ctx);

@@ -7,6 +7,11 @@ const cors         = require('koa-cors');
 const convert      = require('koa-convert');
 const bodyParser   = require('koa-bodyparser');
 const passport     = require('koa-passport');
+const dbSchema     = require("koa-mongoose-erd-generator");
+const yamljs       = require("yamljs")
+const koaSwagger   = require("koa2-swagger-ui").koaSwagger;
+const fs           = require("fs");
+const path         = require("path");
 
 const passportConfig     = require('./src/auth/passport-config');
 
@@ -25,6 +30,40 @@ mongoose.connect(config.db, {useNewUrlParser: true});
 // suppress deprecation warnings
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
+
+// Serve documentation
+server.use(
+	dbSchema(
+	  "/docs/db",
+	  { modelsPath: __dirname + "/src/models", nameColor: "#007bff" },
+	  __dirname + "/docs/dbSchema.html"
+	)
+  );
+  
+  
+  const spec = yamljs.load("./docs/docs.yaml");
+  server.use(
+	koaSwagger({
+	  routePrefix: "/docs",
+	  title: "Explorer",
+	  swaggerOptions: { spec },
+	  favicon: "/docs/favicon.ico",
+	  hideTopbar: true,
+	})
+  );
+  const favIcon = fs.readFileSync(path.join(__dirname, "/docs/favicon.ico"));
+  server.use((ctx, next) => {
+	if (
+	  ctx.path == "/docs/favicon.ico" &&
+	  ctx.method == "GET" &&
+	  ctx.method != "Head"
+	) {
+	  ctx.body = favIcon;
+	  ctx.status = 200;
+	  return ctx;
+	}
+	return next();
+  });
 
 // setup passport
 server.use(passport.initialize());

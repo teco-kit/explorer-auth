@@ -86,7 +86,7 @@ module.exports = (app, passport) => {
   /**
    * UNREGISTER
    *
-   * check if token is valid
+   * Deltes a user from the database
    * route:					/unregister
    * method type: 	DELETE
    */
@@ -106,7 +106,7 @@ module.exports = (app, passport) => {
   });
 
   /**
-   * Maps e-mail addresses to user._id
+   * Maps userNames to user._id
    * route: /id
    * method: type: POST
    */
@@ -114,6 +114,12 @@ module.exports = (app, passport) => {
     await userController.getUsersIds(ctx, passport);
   });
 
+
+  /**
+   * Maps userIds to userNames
+   * route: /userName
+   * method: type: POST
+   */
   router.post("/userName", async (ctx) => {
     await userController.getUserNames(ctx, passport);
   });

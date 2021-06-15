@@ -21,7 +21,6 @@ async function handleAuthentication(ctx, passport) {
 		}
 
 		const jwtToken = ctx.request.headers.authorization.replace('Bearer ', '');
-		console.log('jwtToken', jwtToken);
 		try {
 			const jwtUserObject = await jwt.verify(jwtToken, secret);
 			if(jwtUserObject.twoFactorEnabled && !jwtUserObject.twoFactorVerified) {
@@ -58,7 +57,7 @@ async function init2Fa(ctx) {
 	const { user } = ctx.req;
 
 	if(!user) {
-		ctx.body = {error: 'User not found'};
+		ctx.body = {error: 'Unauthorized'};
 		ctx.status = 404;
 		return ctx;
 	}
@@ -93,8 +92,8 @@ async function verify2Fa(ctx) {
 
 	// check if token provided
 	if(!token) {
-		ctx.body = {error: 'token for TwoFactorAuthentication missing'};
-		ctx.status = 400;
+		ctx.body = {error: 'Token for TwoFactorAuthentication missing'};
+		ctx.status = 401;
 		return ctx;
 	}
 
@@ -144,8 +143,8 @@ async function reset2Fa(ctx) {
 	const { user } = ctx.req;
 
 	if(!user) {
-		ctx.body = {error: 'User not found'};
-		ctx.status = 404;
+		ctx.body = {error: 'Unauthorized'};
+		ctx.status = 401;
 		return ctx;
 	}
 
