@@ -255,7 +255,7 @@ describe("Testing API Routes", () => {
         .expect(400)
         .end((err, res) => {
           expect(res.body.error).to.be.equal(
-            "Provided email does not match user email."
+            "Provided e-mail does not match user e-mail."
           );
           done(err);
         });
@@ -280,7 +280,7 @@ describe("Testing API Routes", () => {
         .expect(200)
         .end((err, res) => {
           expect(res.body.message).to.be.equal(
-            `deleted user with email: ${email}`
+            `Deleted user with e-mail: ${email}`
           );
           done(err);
         });

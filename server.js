@@ -32,6 +32,7 @@ mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 
 // Serve documentation
+
 server.use(
 	dbSchema(
 	  "/docs/db",
