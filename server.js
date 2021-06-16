@@ -35,7 +35,7 @@ mongoose.set('useCreateIndex', true);
 
 server.use(
 	dbSchema(
-	  "/docs/db",
+	  "/auth/docs/db",
 	  { modelsPath: __dirname + "/src/models", nameColor: "#007bff" },
 	  __dirname + "/docs/dbSchema.html"
 	)
@@ -48,14 +48,14 @@ server.use(
 	  routePrefix: "/docs",
 	  title: "Explorer",
 	  swaggerOptions: { spec },
-	  favicon: "/docs/favicon.ico",
+	  favicon: "/auth/docs/favicon.ico",
 	  hideTopbar: true,
 	})
   );
   const favIcon = fs.readFileSync(path.join(__dirname, "/docs/favicon.ico"));
   server.use((ctx, next) => {
 	if (
-	  ctx.path == "/docs/favicon.ico" &&
+	  ctx.path == "/auth/docs/favicon.ico" &&
 	  ctx.method == "GET" &&
 	  ctx.method != "Head"
 	) {

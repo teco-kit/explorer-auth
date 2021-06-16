@@ -3,6 +3,7 @@ info:
   description: API specification for Explorer REST API. See <a target=_blank
     href='http://explorer.dmz.teco.edu/api/docs/db'>DB</a> for the database schema.
     Go to <a href="http://explorer.dmz.teco.edu">explorer.dmz.teco.edu</a> to try it out!
+    Backend documentation can be found <a href="http://explorer.dmz.teco.edu/api/docs">here</a>.
   version: 1.0.0
   title: Explorer Auth
 servers:
